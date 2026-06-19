@@ -1,3 +1,5 @@
+package Basic_Exercises;
+
 public class Reversed_String {
     public static void main(String[] args) {
         System.out.println(Reversed_String.reverse("adiooooos"));
