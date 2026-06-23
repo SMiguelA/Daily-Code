@@ -1,3 +1,5 @@
+package Basic_Exercises;
+
 public class FizzBuzz {
     public static void main(String[] args) {
         String flag = "";
