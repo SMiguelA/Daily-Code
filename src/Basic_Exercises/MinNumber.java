@@ -19,7 +19,6 @@ public class MinNumber {
                 nums[i+1] = 0;
             }
         }
-
         return newNumsArr;
     }
 }
