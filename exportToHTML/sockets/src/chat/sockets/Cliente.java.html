@@ -1,0 +1,218 @@
+<html>
+<head>
+<title>Cliente.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #d55fde;}
+.s1 { color: #bbbbbb;}
+.s2 { color: #5c6370;}
+.s3 { color: #d19a66;}
+.s4 { color: #89ca78;}
+.s5 { color: #2bbac5;}
+</style>
+</head>
+<body bgcolor="#282c34">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Cliente.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">sockets.src.chat.sockets;</span>
+
+<span class="s0">import </span><span class="s1">javax.swing.*;</span>
+<span class="s0">import </span><span class="s1">java.awt.event.ActionEvent;</span>
+<span class="s0">import </span><span class="s1">java.awt.event.ActionListener;</span>
+<span class="s0">import </span><span class="s1">java.awt.event.WindowAdapter;</span>
+<span class="s0">import </span><span class="s1">java.awt.event.WindowEvent;</span>
+<span class="s0">import </span><span class="s1">java.io.IOException;</span>
+<span class="s0">import </span><span class="s1">java.io.ObjectInputStream;</span>
+<span class="s0">import </span><span class="s1">java.io.ObjectOutputStream;</span>
+<span class="s0">import </span><span class="s1">java.io.Serializable;</span>
+<span class="s0">import </span><span class="s1">java.net.ServerSocket;</span>
+<span class="s0">import </span><span class="s1">java.net.Socket;</span>
+<span class="s0">import </span><span class="s1">java.util.ArrayList;</span>
+
+<span class="s0">public class </span><span class="s1">Cliente {</span>
+    <span class="s0">public static void </span><span class="s1">main(String[] args) {</span>
+
+        <span class="s1">MarcoCliente marco = </span><span class="s0">new </span><span class="s1">MarcoCliente();</span>
+        <span class="s1">marco.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">// Crear Ventana</span>
+<span class="s0">class </span><span class="s1">MarcoCliente </span><span class="s0">extends </span><span class="s1">JFrame{</span>
+    <span class="s0">public </span><span class="s1">MarcoCliente(){</span>
+        <span class="s2">// Para crear el marco de la interfaz</span>
+        <span class="s1">setBounds(</span><span class="s3">600</span><span class="s1">, </span><span class="s3">300</span><span class="s1">, </span><span class="s3">280</span><span class="s1">, </span><span class="s3">350</span><span class="s1">);</span>
+        <span class="s1">String nickUser = JOptionPane.showInputDialog(</span><span class="s4">&quot;Usuario: &quot;</span><span class="s1">);</span>
+        <span class="s1">LaminaMarcoCliente milamina = </span><span class="s0">new </span><span class="s1">LaminaMarcoCliente(nickUser);</span>
+        <span class="s1">add(milamina);</span>
+        <span class="s1">setVisible(</span><span class="s0">true</span><span class="s1">);</span>
+
+        <span class="s1">addWindowListener(</span><span class="s0">new </span><span class="s1">StatusOnline(nickUser));</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">// Eventos para la ventana</span>
+<span class="s0">class </span><span class="s1">StatusOnline </span><span class="s0">extends </span><span class="s1">WindowAdapter{</span>
+    <span class="s0">private </span><span class="s1">String nickUser;</span>
+
+    <span class="s0">public </span><span class="s1">StatusOnline(String nickUser){</span>
+        <span class="s0">this</span><span class="s1">.nickUser = nickUser;</span>
+    <span class="s1">}</span>
+    <span class="s2">// ONLINE</span>
+    <span class="s0">public void </span><span class="s1">windowOpened(WindowEvent e){</span>
+        <span class="s0">try </span><span class="s1">{</span>
+            <span class="s1">Socket socket = </span><span class="s0">new </span><span class="s1">Socket(</span><span class="s4">&quot;192.168.2.15&quot;</span><span class="s1">, </span><span class="s3">3081</span><span class="s1">);</span>
+            <span class="s1">InfoChat datos = </span><span class="s0">new </span><span class="s1">InfoChat();</span>
+            <span class="s1">datos.setUsuario(nickUser);</span>
+            <span class="s1">datos.setMensaje(</span><span class="s4">&quot; online&quot;</span><span class="s1">);</span>
+            <span class="s1">ObjectOutputStream paqueteDatos = </span><span class="s0">new </span><span class="s1">ObjectOutputStream(socket.getOutputStream());</span>
+            <span class="s1">paqueteDatos.writeObject(datos);</span>
+
+            <span class="s1">paqueteDatos.close();</span>
+            <span class="s1">socket.close();</span>
+        <span class="s1">}</span><span class="s0">catch </span><span class="s1">(Exception exception){</span>
+            <span class="s1">System.out.println(exception.getMessage());</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">// Crear acciones en ventana</span>
+<span class="s0">class </span><span class="s1">LaminaMarcoCliente </span><span class="s0">extends </span><span class="s1">JPanel </span><span class="s0">implements </span><span class="s1">Runnable{</span>
+    <span class="s0">private </span><span class="s1">JTextField mensaje;</span>
+    <span class="s0">private final </span><span class="s1">JComboBox destinatario;</span>
+    <span class="s0">private final </span><span class="s1">JLabel usuario;</span>
+    <span class="s0">private </span><span class="s1">JButton boton;</span>
+    <span class="s0">private </span><span class="s1">JTextArea bandeja;</span>
+
+    <span class="s0">public </span><span class="s1">LaminaMarcoCliente(String nickUser){</span>
+
+        <span class="s1">usuario = </span><span class="s0">new </span><span class="s1">JLabel();</span>
+        <span class="s1">usuario.setText(</span><span class="s4">&quot;Usuario: &quot;</span><span class="s1">+nickUser);</span>
+        <span class="s1">add(usuario);</span>
+
+        <span class="s1">JLabel texto = </span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;Online: &quot;</span><span class="s1">);</span>
+        <span class="s1">add(texto);</span>
+
+        <span class="s1">destinatario = </span><span class="s0">new </span><span class="s1">JComboBox();</span>
+        <span class="s1">add(destinatario);</span>
+
+        <span class="s1">bandeja = </span><span class="s0">new </span><span class="s1">JTextArea(</span><span class="s3">12</span><span class="s1">,</span><span class="s3">20</span><span class="s1">);</span>
+        <span class="s1">add(bandeja);</span>
+
+        <span class="s1">mensaje = </span><span class="s0">new </span><span class="s1">JTextField(</span><span class="s3">20</span><span class="s1">);</span>
+        <span class="s1">add(mensaje);</span>
+
+        <span class="s1">boton = </span><span class="s0">new </span><span class="s1">JButton(</span><span class="s4">&quot;Enviar&quot;</span><span class="s1">);</span>
+        <span class="s1">SendText event = </span><span class="s0">new </span><span class="s1">SendText();</span>
+        <span class="s1">boton.addActionListener(event);</span>
+        <span class="s1">add(boton);</span>
+
+        <span class="s1">Thread hilo = </span><span class="s0">new </span><span class="s1">Thread(</span><span class="s0">this</span><span class="s1">);</span>
+        <span class="s1">hilo.start();</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">run() {</span>
+        <span class="s0">try </span><span class="s1">{</span>
+            <span class="s1">ServerSocket servidorCliente = </span><span class="s0">new </span><span class="s1">ServerSocket(</span><span class="s3">9090</span><span class="s1">);</span>
+            <span class="s1">Socket cliente;</span>
+            <span class="s1">InfoChat paqueteRecibido;</span>
+
+            <span class="s0">while</span><span class="s1">(</span><span class="s0">true</span><span class="s1">){</span>
+                <span class="s1">cliente = servidorCliente.accept();</span>
+
+                <span class="s1">ObjectInputStream flujoEntrada = </span><span class="s0">new </span><span class="s1">ObjectInputStream(cliente.getInputStream());</span>
+
+                <span class="s1">paqueteRecibido = (InfoChat) flujoEntrada.readObject();</span>
+                <span class="s0">if</span><span class="s1">(!paqueteRecibido.getMensaje().equals(</span><span class="s4">&quot; online&quot;</span><span class="s1">)){</span>
+                    <span class="s1">bandeja.append(</span><span class="s4">&quot;</span><span class="s5">\n</span><span class="s4">&quot; </span><span class="s1">+ paqueteRecibido.getUsuario() + </span><span class="s4">&quot;: &quot; </span><span class="s1">+ paqueteRecibido.getMensaje());</span>
+                <span class="s1">}</span><span class="s0">else</span><span class="s1">{</span>
+                    <span class="s1">ArrayList&lt;String&gt; ipsMenu = </span><span class="s0">new </span><span class="s1">ArrayList&lt;&gt;();</span>
+                    <span class="s1">ipsMenu = paqueteRecibido.getIps();</span>
+                    <span class="s1">destinatario.removeAllItems();</span>
+
+                    <span class="s0">for</span><span class="s1">(String z:ipsMenu){</span>
+                        <span class="s1">destinatario.addItem(z);</span>
+                    <span class="s1">}</span>
+
+                    <span class="s1">bandeja.append(</span><span class="s4">&quot;</span><span class="s5">\n</span><span class="s4">&quot; </span><span class="s1">+ paqueteRecibido.getIps());</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+
+        <span class="s1">}</span><span class="s0">catch </span><span class="s1">(Exception e){</span>
+            <span class="s1">System.out.println(e.getMessage());</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+
+    <span class="s2">// funcion para el boton - SOCKET - Enviar mensaje</span>
+    <span class="s0">private class </span><span class="s1">SendText </span><span class="s0">implements </span><span class="s1">ActionListener{</span>
+
+        <span class="s1">@Override</span>
+        <span class="s0">public void </span><span class="s1">actionPerformed(ActionEvent e) {</span>
+
+            <span class="s1">bandeja.append(</span><span class="s4">&quot;</span><span class="s5">\n </span><span class="s4">Yo: &quot; </span><span class="s1">+ mensaje.getText());</span>
+
+            <span class="s0">try </span><span class="s1">{</span>
+
+                <span class="s1">Socket socket = </span><span class="s0">new </span><span class="s1">Socket(</span><span class="s4">&quot;192.168.2.15&quot;</span><span class="s1">, </span><span class="s3">3081</span><span class="s1">); </span><span class="s2">// Socket</span>
+
+                <span class="s1">InfoChat chatData = </span><span class="s0">new </span><span class="s1">InfoChat();</span>
+                <span class="s1">chatData.setUsuario(usuario.getText());</span>
+                <span class="s1">chatData.setDestinatario((String) destinatario.getSelectedItem());</span>
+                <span class="s1">chatData.setMensaje(mensaje.getText());</span>
+
+                <span class="s1">ObjectOutputStream flujoData = </span><span class="s0">new </span><span class="s1">ObjectOutputStream(socket.getOutputStream());</span>
+                <span class="s1">flujoData.writeObject(chatData);</span>
+                <span class="s1">flujoData.close();</span>
+
+                <span class="s2">// PRUEBA ENVIO DE DATOS</span>
+                <span class="s2">/*DataOutputStream flujoSalida = new DataOutputStream(socket.getOutputStream()); // Datos de salida 
+                flujoSalida.writeUTF(mensaje.getText()); // Capturar dato de salida 
+                flujoSalida.close();*/</span>
+
+            <span class="s1">} </span><span class="s0">catch </span><span class="s1">(IOException ex) {</span>
+                <span class="s1">System.out.println(ex.getMessage());</span>
+                <span class="s0">throw new </span><span class="s1">RuntimeException(ex);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+
+
+<span class="s0">class </span><span class="s1">InfoChat </span><span class="s0">implements </span><span class="s1">Serializable {</span>
+    <span class="s0">private </span><span class="s1">String usuario, destinatario, mensaje;</span>
+    <span class="s0">private </span><span class="s1">ArrayList&lt;String&gt; ips;</span>
+
+    <span class="s0">public </span><span class="s1">ArrayList&lt;String&gt; getIps() {</span>
+        <span class="s0">return </span><span class="s1">ips;</span>
+    <span class="s1">}</span>
+    <span class="s0">public void </span><span class="s1">setIps(ArrayList&lt;String&gt; ips) {</span>
+        <span class="s0">this</span><span class="s1">.ips = ips;</span>
+    <span class="s1">}</span>
+    <span class="s0">public </span><span class="s1">String getUsuario() {</span>
+        <span class="s0">return </span><span class="s1">usuario;</span>
+    <span class="s1">}</span>
+    <span class="s0">public void </span><span class="s1">setUsuario(String usuario) {</span>
+        <span class="s0">this</span><span class="s1">.usuario = usuario;</span>
+    <span class="s1">}</span>
+    <span class="s0">public </span><span class="s1">String getDestinatario() {</span>
+        <span class="s0">return </span><span class="s1">destinatario;</span>
+    <span class="s1">}</span>
+    <span class="s0">public void </span><span class="s1">setDestinatario(String destinatario) {</span>
+        <span class="s0">this</span><span class="s1">.destinatario = destinatario;</span>
+    <span class="s1">}</span>
+    <span class="s0">public </span><span class="s1">String getMensaje() {</span>
+        <span class="s0">return </span><span class="s1">mensaje;</span>
+    <span class="s1">}</span>
+    <span class="s0">public void </span><span class="s1">setMensaje(String mensaje) {</span>
+        <span class="s0">this</span><span class="s1">.mensaje = mensaje;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>
