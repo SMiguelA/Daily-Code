@@ -1,5 +1,4 @@
-package sockets.src.chat.sockets;
-import sockets.src.chat.sockets.InfoChat;
+package sockets.chat;
 
 import javax.swing.*;
 import java.awt.*;
@@ -76,6 +75,7 @@ class MarcoServidor extends JFrame implements Runnable{
                     String ip = ipAddressCliente.getHostAddress();
                     listaIp.add(ip);
                     chatDataRecibido.setIps(listaIp);
+                    areaTexto.append("\nUsuario " + usuario + " conectado desde: " + ip);
 
                     for(String eachIp: listaIp){
                         Socket socketEnviar = new Socket(eachIp, 9090);
@@ -85,8 +85,8 @@ class MarcoServidor extends JFrame implements Runnable{
                         chatDataEnvio.close();
 
                         socketEnviar.close();
-                        socketRecibir.close();
                     }
+                    socketRecibir.close();
                     //----------------------------------//
                 }
             }

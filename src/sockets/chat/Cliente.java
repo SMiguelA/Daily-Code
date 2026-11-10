@@ -1,4 +1,4 @@
-package sockets.src.chat.sockets;
+package sockets.chat;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -45,7 +45,7 @@ class StatusOnline extends WindowAdapter{
     // ONLINE
     public void windowOpened(WindowEvent e){
         try {
-            Socket socket = new Socket("192.168.2.15", 3081);
+            Socket socket = new Socket("192.168.2.4", 3081);
             InfoChat datos = new InfoChat();
             datos.setUsuario(nickUser);
             datos.setMensaje(" online");
@@ -139,7 +139,7 @@ class LaminaMarcoCliente extends JPanel implements Runnable{
 
             try {
 
-                Socket socket = new Socket("192.168.2.15", 3081); // Socket
+                Socket socket = new Socket("192.168.2.4", 3081); // Socket
 
                 InfoChat chatData = new InfoChat();
                 chatData.setUsuario(usuario.getText());
